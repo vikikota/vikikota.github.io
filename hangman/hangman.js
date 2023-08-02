@@ -19,10 +19,18 @@ const getData = async (server) => {
 getData('https://random-word-api.vercel.app/api?words=5');
 
 const inputsContainer = document.getElementById('inputs');
+
 const zombieMeterContainer = document.getElementById('zombie-meter');
+
+const pointsContainer = document.getElementById('score');
+
+const finalModal = document.getElementById('final-modal');
+
 let zombieImg = document.getElementById('zombie-img');
-console.log(zombieImg);
+
 let zombieMeter = 0;
+
+let points = 0;
 
 let randWord;
 let randWordArray = [];
@@ -37,15 +45,18 @@ async function randomWords() {
         randWord =
             words[Math.floor(Math.random() * words.length)].toUpperCase();
         randWordArray = [...randWord];
+        divGenerator();
         console.log(randWord);
 
-        randWordArray.forEach((letter) => {
-            const letterDiv = document.createElement('div');
-            letterDiv.classList.add('letter-div');
-            letterDiv.textContent = '';
-            letterDiv.setAttribute('data-code', `${letter.toUpperCase()}`);
-            inputsContainer.append(letterDiv);
-        });
+        function divGenerator() {
+            randWordArray.forEach((letter) => {
+                const letterDiv = document.createElement('div');
+                letterDiv.classList.add('letter-div');
+                letterDiv.textContent = '';
+                letterDiv.setAttribute('data-code', `${letter.toUpperCase()}`);
+                inputsContainer.append(letterDiv);
+            });
+        }
     } catch (error) {
         console.log(error);
     }
@@ -60,16 +71,24 @@ function findChar(pressedButton, key) {
         for (let i in randWordArray) {
             if (randWordArray[i] === pressedButton) {
                 divs[i].innerHTML = pressedButton;
-
+                divs.forEach((div) => {
+                    if (div.innerHTML == '') {
+                        return;
+                    } else {
+                        isWinner()
+                    }
+                });
                 if (key.classList.contains('found')) {
-                    console.log('Ezt a betűt már kérted, válassz újat!'); // dupla betűnél még hibás
+                    return;
                 } else {
-                    key.classList.add('found'); // ELTALÁLTA A BETŰT / Dóri, ide is jöhet egy üzike
+                    key.classList.add('found');
+                    points += 100;
+                    pointsContainer.innerHTML = points;
                 }
             }
         }
     } else if (key.classList.contains('not-found')) {
-        console.log('Ezt a betűt már kérted, válassz újat!'); // dupla betűnél még hibás
+        return;
     } else {
         key.classList.add('not-found');
         zombieMeter++;
@@ -77,10 +96,9 @@ function findChar(pressedButton, key) {
         zombieImg.innerHTML = '';
         zombieImg.innerHTML = `<img src="images/state${zombieMeter}.svg" alt="zombie">`;
 
-        /*     if (zombieMeter == 5) {
-            gameOver()
-        } */
-        //ide fognak jönni Esztinek, Dórinak és Misinek a függvényei
+        if (zombieMeter == 5) {
+            gameOver();
+        }
     }
 }
 
@@ -112,5 +130,28 @@ const keyPressDown = (event) => {
 };
 
 window.addEventListener('keydown', keyPressDown);
+// win
 
+function isWinner() {
+console.log("WINNER")   
+}
 // game over
+function gameOver() {
+    finalModal.style.display = 'flex';
+    points = 0;
+    pointsContainer.innerHTML = points;
+    zombieMeter = 0;
+    zombieMeterContainer.innerHTML = zombieMeter;
+    inputsContainer.innerHTML = '';
+    randomWords();
+
+    keys.forEach((key) => {
+        if (key.classList.contains('found')) {
+            key.classList.remove('found');
+        } else if (key.classList.contains('not-found')) {
+            key.classList.remove('not-found');
+        }
+    });
+}
+
+finalModal.addEventListener('click', () => (finalModal.style.display = 'none'));
